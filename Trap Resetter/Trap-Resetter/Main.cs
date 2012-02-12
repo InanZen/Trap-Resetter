@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Linq;
 using Terraria;
 using Hooks;
@@ -10,8 +8,7 @@ using TShockAPI.DB;
 using MySql.Data.MySqlClient;
 
 namespace TrapResetter
-{
-    
+{    
     [APIVersion(1, 11)]
     public class TrapResetter : TerrariaPlugin
     {
@@ -56,7 +53,7 @@ namespace TrapResetter
         public TrapResetter(Main game)
             : base(game)
         {
-            Order = -1;
+            Order = 5;
         }
         public void OnInitialize()
         {
@@ -71,7 +68,6 @@ namespace TrapResetter
             SQLWriter.EnsureExists(table);
             ReloadTraps();
             Commands.ChatCommands.Add(new Command("TrapReset", TrapCommand, "trap"));
-            //Commands.ChatCommands.Add(new Command("TrapReset", BoulderCannon, "boulder"));
         }
         public static void ReloadTraps()
         {
@@ -117,12 +113,6 @@ namespace TrapResetter
         }
         void TileEdit(Object sender, TShockAPI.GetDataHandlers.TileEditEventArgs args)
         {
-                    
-          /* Console.WriteLine("Data: "+Main.tile[args.X,args.Y].Data.active+" type:"+Main.tile[args.X,args.Y].Data.type+" wall:"+Main.tile[args.X,args.Y].Data.wall+" -x:"+Main.tile[args.X,args.Y].Data.frameX+" y:"+Main.tile[args.X,args.Y].Data.frameY);
-            Console.WriteLine("Active: " + Main.tile[args.X, args.Y].active + " checkLiq: " + Main.tile[args.X, args.Y].checkingLiquid + " framenum: " + Main.tile[args.X, args.Y].frameNumber + " framex:" + Main.tile[args.X, args.Y].frameX + " framey:" + Main.tile[args.X, args.Y].frameY);
-            Console.WriteLine("lava: " + Main.tile[args.X, args.Y].lava + " lighted:" + Main.tile[args.X, args.Y].lighted + " liquid:" + Main.tile[args.X, args.Y].liquid + " skipLiq.:" + Main.tile[args.X, args.Y].skipLiquid + " type:" + Main.tile[args.X, args.Y].type);
-            Console.WriteLine("wall: " + Main.tile[args.X, args.Y].wall + " wallframenum:" + Main.tile[args.X, args.Y].wallFrameNumber + " wallframeX:" + Main.tile[args.X, args.Y].wallFrameX + " wallframeY:" + Main.tile[args.X, args.Y].wallFrameY + " wire:" + Main.tile[args.X, args.Y].wire);
-*/
             if (awaitingPlayers.Count > 0 && awaitingPlayers.Keys.Contains(args.Player.UserID))
             {
                 byte awaitingType = awaitingPlayers[args.Player.UserID];
@@ -155,16 +145,8 @@ namespace TrapResetter
 
                 }
                 awaitingPlayers.Remove(args.Player.UserID);
-            }
-            /*else if (boulderCannonPlayers.Count > 0 && boulderCannonPlayers.Contains(args.Player.UserID))
-            {
-                generateBoulder(args.X, args.Y);
-                updateTile(args.X, args.Y);
-                args.Player.SendTileSquare(args.X, args.Y, 1);
-            }
-            */            
+            }        
         }
-
         public void OnUpdate()
         {
             if ((DateTime.UtcNow - LastCheck).TotalSeconds >= 10)
@@ -177,21 +159,18 @@ namespace TrapResetter
                         if (trap.TrapID == 138) generateBoulder(trap.X, trap.Y);
                         else generateExplosives(trap.X, trap.Y);
                         updateTile(trap.X, trap.Y);
-                        //Console.WriteLine("replaced trap");
                     }
                 }
             }
         }
         public static void updateTile(int x, int y)
         {
-
             x = Netplay.GetSectionX(x);
             y = Netplay.GetSectionY(y);
             foreach (Terraria.ServerSock theSock in Netplay.serverSock)
             {
                 theSock.tileSection[x, y] = false;
             }
-
         }
         public void generateExplosives(int x, int y)
         {
@@ -221,9 +200,7 @@ namespace TrapResetter
             Main.tile[x + 1, y - 1].type = 138;
             Main.tile[x + 1, y - 1].frameX = 18;
             Main.tile[x + 1, y - 1].frameY = 0;
-
         }
-
         public class TrapObj 
         {
             public int TrapID { get; set; }
@@ -272,13 +249,6 @@ namespace TrapResetter
                         break;
                     }
             }
-        }
-       /* public void BoulderCannon(CommandArgs args)
-        {
-            if (boulderCannonPlayers.Contains(args.Player.UserID))
-                boulderCannonPlayers.Remove(args.Player.UserID);
-            else
-                boulderCannonPlayers.Add(args.Player.UserID);
-        }*/
+        }     
     }
 }
